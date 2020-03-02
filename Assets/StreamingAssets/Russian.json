@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "key": "k_new_game",
+      "value": "Новая игра"
+    },
+    {
+      "key": "k_levels",
+      "value": "Уровни"
+    },
+    {
+      "key": "k_settings",
+      "value": "Настройки"
+    },
+    {
+      "key": "k_exit_game",
+      "value": "Выход"
+    }
+  ]
+}

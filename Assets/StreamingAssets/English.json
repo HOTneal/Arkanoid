@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "key": "k_new_game",
+      "value": "New Game"
+    },
+    {
+      "key": "k_levels",
+      "value": "Levels"
+    },
+    {
+      "key": "k_settings",
+      "value": "Settings"
+    },
+    {
+      "key": "k_exit_game",
+      "value": "Exit"
+    }
+  ]
+}

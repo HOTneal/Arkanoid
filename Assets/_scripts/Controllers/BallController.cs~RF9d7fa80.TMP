@@ -1,0 +1,114 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class BallController : MonoBehaviour
+{
+    #region Singltone
+    private static BallController _instance;
+    public static BallController Instance => _instance;
+
+    private void Awake()
+    {
+        if (_instance != null)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            _instance = this;
+        }
+    }
+    #endregion
+
+    [SerializeField] private float radius = 1;
+    private bool isRun = false;
+    public bool m_BallCanMove = true;
+    [SerializeField] private bool m_AutoStart = false;
+    [SerializeField] private bool m_BallAutoDestruction = false;
+    [SerializeField] private float m_TimeForAutoDestruction;
+    private Vector2 target;
+    private Vector2 currentDirection, nextDirection;
+    private GameObject nextObject;
+    public float speed = 1;
+    private RaycastHit2D hit;
+    private Vector2 m_DefaultBallPosition;
+
+    private void Start()
+    {
+        if (m_AutoStart == true)
+        {
+            isRun = true;
+            AddVelocity();
+        }
+
+        if (m_BallAutoDestruction == true)
+            StartCoroutine(BallAutoDestruction());
+
+        m_DefaultBallPosition = transform.position;
+    }
+
+    private void Update()
+    {
+        if (m_BallCanMove == true)
+        {
+            if (Input.GetKey(KeyCode.Space))
+            {
+                isRun = true;
+                AddVelocity();
+            }
+
+            if (!isRun) return;
+
+            target = GetNextPoint();
+            if (target != null)
+            {
+                transform.position = Vector2.MoveTowards(transform.position, target, Time.deltaTime * speed);
+                if (Vector2.Distance(transform.position, target) <= 0.01f)
+                {
+                    if (hit.transform.GetComponent<LinkBrickManager>() != null)
+                        hit.transform.GetComponent<LinkBrickManager>().BreakBrinkLink();
+
+                    if (hit.transform.GetComponent<FallManager>() != null)
+                        StartCoroutine(hit.transform.GetComponent<FallManager>().StartFall());
+
+                    currentDirection = nextDirection;
+                    target = GetNextPoint();
+                }
+            }
+        }
+
+    }
+
+    void AddVelocity()
+    {
+        currentDirection = new Vector2(1, 1);
+    }
+
+    Vector2 GetNextPoint()
+    {
+        hit = Physics2D.Raycast(transform.position, currentDirection);    // получаем RaycastHit
+
+        Vector2 hitFinish = hit.point - (currentDirection.normalized * radius); // Будущая точка столкновения с учетом радиуса мяча
+        nextObject = hit.transform.gameObject;    // Обьект с которым столкнется мяч
+        nextDirection = Vector2.Reflect(currentDirection, hit.normal); // Направление отскока
+
+        // debug:
+        Debug.DrawLine(transform.position, hitFinish);
+        Debug.DrawRay(hitFinish, nextDirection * 10);
+        // end debug
+
+        return hitFinish;
+    }
+
+    private IEnumerator BallAutoDestruction()
+    {
+        yield return new WaitForSeconds(m_TimeForAutoDestruction);
+        Destroy(gameObject);
+    }
+
+    public void ResetBallPosition()
+    {
+        transform.position = m_DefaultBallPosition;
+    }
+}
